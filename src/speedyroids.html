@@ -2,18 +2,23 @@
 <html>
 
   <head>
-    <title>Speedyroids</title>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/launcher-icon-4x.png">
     <link rel="stylesheet" href="css/speedyroids.css" type="text/css" />
 
     <script type="text/javascript" src="js/internals/b4w.min.js"></script>
     <script type="text/javascript" src="js/speedyroids.js"></script>
+
+    <title>Speedyroids!</title>
   </head>
 
   <body>
-    <div id="main_canvas_container"></div>
+    <div id="canvas-container"></div>
   </body>
 
 </html>
