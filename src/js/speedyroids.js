@@ -8,7 +8,7 @@
         var m_app = require('app');
         var m_data = require('data');
         var m_cfg = require('config');
-        var m_preloader = require("preloader");
+        var m_preloader = require('preloader');
 
         var quality = m_cfg.P_HIGH;
         if (Config.QUALITY === 'low') {
@@ -28,7 +28,8 @@
                 show_fps: Config.SHOW_FPS,
                 console_verbose: true,
                 autoresize: true,
-                quality: quality
+                quality: quality,
+                physics_enabled: true
             });
         };
 
@@ -45,10 +46,10 @@
                 return false;
             };
 
-            load();
+            load(canvas_elem);
         }
 
-        function load() {
+        function load(canvas_elem) {
             m_preloader.create_preloader({
                 container_color: '#222',
                 bar_color: '#444',
@@ -56,13 +57,10 @@
                 font_color: '#ddd'
             });
 
-            m_data.load('speedyroids.json', load_cb, preloader_cb);
-        }
-
-        function load_cb(data_id) {
-            m_app.enable_camera_controls();
-
-            // TODO
+            // This should be menu... but not today
+            m_data.load('scenes/play.json', function(data_id) {
+                PlayState.init(require, canvas_elem);
+            }, preloader_cb);
         }
 
         function preloader_cb(percentage) {
@@ -70,6 +68,5 @@
         }
     });
 
-    var game = b4w.require(Config.PROJECT_NAME);
-    game.init();
+    b4w.require(Config.PROJECT_NAME).init();
 })();
