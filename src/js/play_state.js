@@ -33,48 +33,48 @@ var PlayState = {
     _initObjects: function() {
         this._fighterObject = this._scenesModule.get_object_by_name('FighterCollider');
         this._physModule.set_gravity(this._fighterObject, 0.0);
-        this._fighterSpeedX = 1.0;
-        this._fighterSpeedY = 1.0;
+        this._physModule.apply_velocity(this._fighterObject, 0.0, 0.0, 0.0);
+        this._fighterSpeedX = 10.0;
+        this._fighterSpeedY = 10.0;
     },
 
     _initControls: function() {
-        var keyW = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_W);
-        var keyA = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_A);
-        var keyS = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_S);
-        var keyD = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_D);
+        var keyW = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_W),
+            keyA = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_A),
+            keyS = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_S),
+            keyD = this._ctrlModule.create_keyboard_sensor(this._ctrlModule.KEY_D),
+            mouseMove = this._ctrlModule.create_mouse_move_sensor();
 
-        var keySensors = [keyW, keyA, keyS, keyD];
+        var controlSensors = [keyW, keyA, keyS, keyD, mouseMove];
         var movementLogic = function(s) { return s[0] || s[1] || s[2] || s[3]; };
+        var aimLogic = function(s) { return s[4]; };
 
-        function movementFunc(obj, id, pulse) {
-            if (pulse == 1) {
-                if (id === this._ctrlModule.KEY_W) {
-                    this._physModule.apply_velocity_world(obj, 0.0, this._fighterSpeedY, 0.0);
-                } else if (id === this._ctrlModule.KEY_A) {
-                    this._physModule.apply_velocity_world(obj, -this._fighterSpeedX, 0.0, 0.0);
-                } else if (id === this._ctrlModule.KEY_S) {
-                    this._physModule.apply_velocity_world(obj, 0.0, -this._fighterSpeedY, 0.0);
-                } else if (id === this._ctrlModule.KEY_D) {
-                    this._physModule.apply_velocity_world(obj, this._fighterSpeedX, 0.0, 0.0);
+        function controlFunc(obj, id, pulse) {
+            var dirX = 0,
+                dirY = 0;
+
+            if (pulse === 1) {
+                if (id === 'MOVEMENT') {
+                    dirY = this._ctrlModule.get_sensor_value(obj, id, 0);
+                    dirX = -this._ctrlModule.get_sensor_value(obj, id, 1);
+                    dirY = !!this._ctrlModule.get_sensor_value(obj, id, 2) ? -1 : dirY;
+                    dirX = !!this._ctrlModule.get_sensor_value(obj, id, 3) ? 1 : dirX;
+                } else if (id === 'AIM') {
+                    var moveSensorPayload = this._ctrlModule.get_sensor_payload(obj, id, 4);
+                    console.log(moveSensorPayload);
+                    // TODO: Aim at mouse cursor
                 }
             }
-            else {
-                this._physModule.apply_velocity_world(obj, 0.0, 0.0, 0.0);
+
+            if (id === 'MOVEMENT') {
+                this._physModule.apply_force_world(obj, this._fighterSpeedX * dirX, this._fighterSpeedY * dirY, 0.0);
             }
         }
 
-        this._ctrlModule.create_kb_sensor_manifold(this._fighterObject, this._ctrlModule.KEY_W,
-                                                   this._ctrlModule.CT_TRIGGER,
-                                                   this._ctrlModule.KEY_W, movementFunc.bind(this));
-        this._ctrlModule.create_kb_sensor_manifold(this._fighterObject, this._ctrlModule.KEY_A,
-                                                   this._ctrlModule.CT_TRIGGER,
-                                                   this._ctrlModule.KEY_A, movementFunc.bind(this));
-        this._ctrlModule.create_kb_sensor_manifold(this._fighterObject, this._ctrlModule.KEY_S,
-                                                   this._ctrlModule.CT_TRIGGER,
-                                                   this._ctrlModule.KEY_S, movementFunc.bind(this));
-        this._ctrlModule.create_kb_sensor_manifold(this._fighterObject, this._ctrlModule.KEY_D,
-                                                   this._ctrlModule.CT_TRIGGER,
-                                                   this._ctrlModule.KEY_D, movementFunc.bind(this));
+        this._ctrlModule.create_sensor_manifold(this._fighterObject, 'MOVEMENT', this._ctrlModule.CT_CONTINUOUS,
+                                                controlSensors, movementLogic, controlFunc.bind(this));
+        this._ctrlModule.create_sensor_manifold(this._fighterObject, 'AIM', this._ctrlModule.CT_CONTINUOUS,
+                                                controlSensors, aimLogic, controlFunc.bind(this));
     },
 
     _onMouseMove: function() {
