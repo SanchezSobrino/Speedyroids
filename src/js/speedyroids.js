@@ -58,7 +58,7 @@
             });
 
             // This should be menu... but not today
-            m_data.load('scenes/play.json', function(data_id) {
+            m_data.load('scenes/Play.json', function(data_id) {
                 PlayState.init(require, canvas_elem);
             }, preloader_cb);
         }

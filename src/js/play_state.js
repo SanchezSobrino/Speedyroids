@@ -31,11 +31,11 @@ var PlayState = {
     },
 
     _initObjects: function() {
-        this._fighterObject = this._scenesModule.get_object_by_name('FighterCollider');
-        this._physModule.set_gravity(this._fighterObject, 0.0);
-        this._physModule.apply_velocity(this._fighterObject, 0.0, 0.0, 0.0);
-        this._fighterSpeedX = 10.0;
-        this._fighterSpeedY = 10.0;
+        this._shipObject = this._scenesModule.get_object_by_name('ShipCollider');
+        this._physModule.set_gravity(this._shipObject, 0.0);
+        this._physModule.apply_velocity(this._shipObject, 0.0, 0.0, 0.0);
+        this._shipSpeedX = 10.0;
+        this._shipSpeedY = 10.0;
     },
 
     _initControls: function() {
@@ -61,19 +61,19 @@ var PlayState = {
                     dirX = !!this._ctrlModule.get_sensor_value(obj, id, 3) ? 1 : dirX;
                 } else if (id === 'AIM') {
                     var moveSensorPayload = this._ctrlModule.get_sensor_payload(obj, id, 4);
-                    console.log(moveSensorPayload);
+                    var objPos = this._transModule.get_translation(obj);
                     // TODO: Aim at mouse cursor
                 }
             }
 
             if (id === 'MOVEMENT') {
-                this._physModule.apply_force_world(obj, this._fighterSpeedX * dirX, this._fighterSpeedY * dirY, 0.0);
+                this._physModule.apply_force_world(obj, this._shipSpeedX * dirX, this._shipSpeedY * dirY, 0.0);
             }
         }
 
-        this._ctrlModule.create_sensor_manifold(this._fighterObject, 'MOVEMENT', this._ctrlModule.CT_CONTINUOUS,
+        this._ctrlModule.create_sensor_manifold(this._shipObject, 'MOVEMENT', this._ctrlModule.CT_CONTINUOUS,
                                                 controlSensors, movementLogic, controlFunc.bind(this));
-        this._ctrlModule.create_sensor_manifold(this._fighterObject, 'AIM', this._ctrlModule.CT_CONTINUOUS,
+        this._ctrlModule.create_sensor_manifold(this._shipObject, 'AIM', this._ctrlModule.CT_CONTINUOUS,
                                                 controlSensors, aimLogic, controlFunc.bind(this));
     },
 
