@@ -2,16 +2,9 @@ var PlayState = {
     init: function(require, canvas_elem) {
         this._$canvas = $(canvas_elem);
 
-        this._bindDOMEvents();
-
         this._initModules(require);
         this._initObjects();
         this._initControls();
-    },
-
-    _bindDOMEvents: function() {
-        this._$canvas.on('mousemove', this._onMouseMove.bind(this));
-        this._$canvas.on('touchmove', this._onMouseMove.bind(this));
     },
 
     _initModules: function(require) {
@@ -25,9 +18,11 @@ var PlayState = {
         this._objModule = require('objects');
         this._physModule = require('physics');
         this._preloaderModule = require('preloader');
+        this._quatModule = require('quat');
         this._scenesModule = require('scenes');
         this._transModule = require('transform');
         this._utilModule = require('util');
+        this._vec3Module  = require('vec3');
     },
 
     _initObjects: function() {
@@ -59,12 +54,45 @@ var PlayState = {
                     dirX = -this._ctrlModule.get_sensor_value(obj, id, 1);
                     dirY = !!this._ctrlModule.get_sensor_value(obj, id, 2) ? -1 : dirY;
                     dirX = !!this._ctrlModule.get_sensor_value(obj, id, 3) ? 1 : dirX;
-                } else if (id === 'AIM') {
-                    var moveSensorPayload = this._ctrlModule.get_sensor_payload(obj, id, 4);
-                    var objPos = this._transModule.get_translation(obj);
-                    // TODO: Aim at mouse cursor
                 }
             }
+
+
+            // TODO: Optimize it
+            var objPos = this._transModule.get_translation(obj);
+            objPos[2] = 0.0;
+            var objPosNormalized = this._vec3Module.create();
+            this._vec3Module.normalize(objPos, objPosNormalized);
+
+            var mousePosCanvas = this._ctrlModule.get_sensor_payload(obj, id, 4);
+
+            // Emit ray from the camera
+            var cam = this._scenesModule.get_active_camera();
+            var plineTmp = this._mathModule.create_pline();
+            var pline = this._camModule.calc_ray(cam, mousePosCanvas[0], mousePosCanvas[1], plineTmp);
+            var vec3Tmp1 = this._vec3Module.create();
+            var camera_ray = this._mathModule.get_pline_directional_vec(pline, vec3Tmp1);
+
+            // Calculate ray/floor plane intersection point
+            var vec3Tmp2 = this._vec3Module.create();
+            var cam_trans = this._transModule.get_translation(cam, vec3Tmp2);
+            this._mathModule.set_pline_initial_point(pline, cam_trans);
+            this._mathModule.set_pline_directional_vec(pline, camera_ray);
+            var vec3Tmp = this._vec3Module.create();
+            var point = this._mathModule.line_plane_intersect([0, 0, 1], 0, pline, vec3Tmp);
+
+            var mousePosNormalized = this._vec3Module.create();
+            this._vec3Module.normalize(point, mousePosNormalized);
+
+            var angle = Math.acos(this._vec3Module.dot(objPosNormalized, mousePosNormalized));
+            console.log(angle * (180/3.1415926));
+            var rotationQuat = this._quatModule.create();
+            this._utilModule.euler_to_quat([0.0, 0.0, angle], rotationQuat);
+
+            var quatTmp = this._quatModule.create();
+            this._transModule.get_rotation(obj, quatTmp);
+            this._quatModule.multiply(quatTmp, rotationQuat, quatTmp);
+            this._transModule.set_rotation_v(obj, quatTmp);
 
             if (id === 'MOVEMENT') {
                 this._physModule.apply_force_world(obj, this._shipSpeedX * dirX, this._shipSpeedY * dirY, 0.0);
@@ -75,10 +103,6 @@ var PlayState = {
                                                 controlSensors, movementLogic, controlFunc.bind(this));
         this._ctrlModule.create_sensor_manifold(this._shipObject, 'AIM', this._ctrlModule.CT_CONTINUOUS,
                                                 controlSensors, aimLogic, controlFunc.bind(this));
-    },
-
-    _onMouseMove: function() {
-
     },
 
     exit: function() {
