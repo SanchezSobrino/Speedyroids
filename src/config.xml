@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.sanchezsobrino.speedyroids"
+        version="1.0.0"
+        android-versionCode="100"
+        ios-CFBundleVersion="100"
+        xmlns="http://www.w3.org/ns/widgets"
+        xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>Speedyroids</name>
+  <description>An asteroids-like proof of concept game using Blend4Web</description>
+  <author email="sanchezsobrino@gmail.com"
+          href="mailto:sanchezsobrino@gmail.com">
+    Santiago Sanchez Sobrino
+  </author>
+
+  <content src="index.html" />
+  <access origin="*" />
+  <allow-intent href="http://*/*" />
+  <allow-intent href="https://*/*" />
+
+  <preference name="DisallowOverscroll" value="true" />
+  <preference name="Fullscreen" value="true" />
+  <preference name="Orientation" value="landscape" />
+
+  <icon src="icon.png" />
+
+  <platform name="android">
+    <preference name="android-minSdkVersion" value="15" />
+  </platform>
+
+  <platform name="ios">
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="Suppresses3DTouchGesture" value="true" />
+    <preference name="deployment-target" value="" />
+    <preference name="exit-on-suspend" value="false" />
+    <preference name="ios-statusbarstyle" value="black-opaque" />
+    <preference name="target-device" value="universal" />
+  </platform>
+</widget>

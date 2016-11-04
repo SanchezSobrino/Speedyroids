@@ -3,7 +3,10 @@ JS_DIR := js
 SRC_DIR := src
 WATCHING_FILES := "*.html, ${JS_DIR}/*.js, ${CSS_DIR}/*.css, ${SRC_DIR}/*.html, ${SRC_DIR}/${JS_DIR}/**/*.js, ${SRC_DIR}/${CSS_DIR}/*.css"
 
-.PHONY: serve install-requirements
+.PHONY: watch install-requirements
+
+build:
+	make -C $(SRC_DIR)/ web
 
 serve:
 	browser-sync start --server --no-notify --files ${WATCHING_FILES}

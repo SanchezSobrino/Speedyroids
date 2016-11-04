@@ -1,4 +1,5 @@
-*.blend1
+src/www/
+*.blend1*
 *~
 *.swp
 .tern-port
