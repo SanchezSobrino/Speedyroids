@@ -52,16 +52,21 @@ var PlayState = {
                 dirY = 0;
 
             if (pulse === 1) {
+                var mousePosCanvas = [0, 0];
+
                 if (id === 'MOVEMENT') {
                     dirY = this._ctrlModule.get_sensor_value(obj, id, 0);
                     dirX = -this._ctrlModule.get_sensor_value(obj, id, 1);
                     dirY = !!this._ctrlModule.get_sensor_value(obj, id, 2) ? -1 : dirY;
                     dirX = !!this._ctrlModule.get_sensor_value(obj, id, 3) ? 1 : dirX;
                 } else if (id === 'MOUSE') {
-                    // TODO: cache create_* calls out from here
-                    // Get 2D screen coordinates
-                    var mousePosCanvas = this._ctrlModule.get_sensor_payload(obj, id, 4);
+                    mousePosCanvas = this._ctrlModule.get_sensor_payload(obj, id, 4).coords;
+                } else if (id === 'TOUCH') {
+                    mousePosCanvas = this._ctrlModule.get_sensor_payload(obj, id, 5).coords;
+                }
 
+                if (id === 'MOUSE' || id === 'TOUCH') {
+                    // TODO: cache create_* calls out from here
                     // Emit ray from the camera
                     var cam = this._scenesModule.get_active_camera();
                     var pline = this._camModule.calc_ray(cam, mousePosCanvas[0], mousePosCanvas[1], this._mathModule.create_pline());
@@ -86,13 +91,11 @@ var PlayState = {
             var direction = this._vec3Module.subtract(this._mousePosition, objPos, this._vec3Module.create());
             var distance = this._vec3Module.length(direction);
 
-            var quatTmp = this._transModule.get_rotation(obj, this._quatModule.create());
-            var origin = this._utilModule.quat_to_dir(quatTmp, [0, 1, 0], this._vec3Module.create());
+            var origin = this._utilModule.quat_to_dir([0, 0, 0, 1], [0, 1, 0], this._vec3Module.create());
             origin[2] = 0.0;
             direction[2] = 0.0;
-            var originNormalized = this._vec3Module.normalize(origin, this._vec3Module.create());
             var directionNormalized = this._vec3Module.normalize(direction, this._vec3Module.create());
-            var rotationQuat = this._quatModule.rotationTo(originNormalized, directionNormalized, this._quatModule.create());
+            var rotationQuat = this._quatModule.rotationTo(origin, directionNormalized, this._quatModule.create());
 
             this._transModule.set_rotation_v(obj, rotationQuat);
         }
@@ -100,7 +103,9 @@ var PlayState = {
         this._ctrlModule.create_sensor_manifold(this._shipObject, 'MOVEMENT', this._ctrlModule.CT_CONTINUOUS,
                                                 controlSensors, movementLogic, controlFunc.bind(this));
         this._ctrlModule.create_sensor_manifold(this._shipObject, 'MOUSE', this._ctrlModule.CT_CONTINUOUS,
-                                                controlSensors, function(s) { return s[4] || s[5]; }, controlFunc.bind(this));
+                                                controlSensors, function(s) { return s[4]; }, controlFunc.bind(this));
+        this._ctrlModule.create_sensor_manifold(this._shipObject, 'TOUCH', this._ctrlModule.CT_CONTINUOUS,
+                                                controlSensors, function(s) { return s[5]; }, controlFunc.bind(this));
         this._ctrlModule.create_sensor_manifold(this._shipObject, 'AIM', this._ctrlModule.CT_CONTINUOUS,
                                                 [aimSensor], function(s) { return s[0]; }, aimFunc.bind(this));
     },

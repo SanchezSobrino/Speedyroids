@@ -4,5 +4,5 @@ var Config = {
 
     // Viewer settings
     SHOW_FPS: true,
-    QUALITY: 'high' // [low, medium, high]
+    QUALITY: 'low' // [low, medium, high]
 };
