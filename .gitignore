@@ -1,4 +1,8 @@
+src/icon.png
+src/js/build/
+src/platforms/
 src/www/
+*.apk
 *.blend1*
 *~
 *.swp

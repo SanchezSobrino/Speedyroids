@@ -29,7 +29,7 @@ _generate:
 	ln -s $(PWD)/assets/icons/icon.png .
 
 generate-android: web _generate
-	cordova platform add android@latest
+	cordova platform add android@https://github.com/apache/cordova-android
 	./add-plugins.sh android
 
 generate-ios: web _generate

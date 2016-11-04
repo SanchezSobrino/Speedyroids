@@ -13,6 +13,7 @@ var PlayState = {
         this._contModule = require('container');
         this._ctrlModule = require('controls');
         this._dataModule = require('data');
+        this._debugModule = require('debug');
         this._mouseModule = require('mouse');
         this._mathModule = require('math');
         this._objModule = require('objects');
